@@ -109,5 +109,17 @@ impl Podcast {
             }
         }
     }
+
+    pub async fn update_podcast_active(&mut conn: DbConn, podcast_id:i32){
+        let podcast_found = Podcast::find_podcast(conn, podcast_id).await.unwrap();
+        db_run!{
+            conn:{
+                dsl::update(podcasts::table.filter(podcasts::id.eq(podcast_id)))
+                .set(podcasts::active.eq(!podcast_found.active))
+                .execute(conn)
+                .expect("Error updating podcast episode");
+            }
+        }
+    }
 }
 
