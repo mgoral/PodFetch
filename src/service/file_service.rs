@@ -1,4 +1,4 @@
-use crate::db::DB;
+use crate::db::dao::DB;
 use crate::models::itunes_models::{Podcast, PodcastEpisode};
 use crate::service::podcast_episode_service::PodcastEpisodeService;
 use reqwest::{Client, ClientBuilder};

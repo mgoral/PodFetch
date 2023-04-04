@@ -1,4 +1,3 @@
-use crate::schema::*;
 use diesel::prelude::{AsChangeset, Identifiable, Insertable, Queryable};
 use crate::service::environment_service::OidcConfig;
 

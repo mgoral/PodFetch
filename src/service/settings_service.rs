@@ -1,4 +1,4 @@
-use crate::db::DB;
+use crate::db::dao::DB;
 use crate::models::settings::Setting;
 
 #[derive(Clone)]

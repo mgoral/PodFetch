@@ -7,3 +7,4 @@ pub mod search_type;
 pub mod settings;
 pub mod web_socket_message;
 pub mod oidc_model;
+mod podcast;

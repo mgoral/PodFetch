@@ -5,10 +5,6 @@ use crate::models::models::{
     Notification, PodcastHistoryItem, PodcastWatchedEpisodeModelWithPodcastEpisode,
     PodcastWatchedPostModel,
 };
-use crate::models::settings::Setting;
-use crate::schema::podcasts::original_image_url;
-use crate::service::mapping_service::MappingService;
-use crate::utils::podcast_builder::PodcastExtra;
 use chrono::{DateTime, Duration, Utc};
 use diesel::dsl::sql;
 use diesel::prelude::*;
@@ -16,6 +12,9 @@ use diesel::{insert_into, sql_query, RunQueryDsl};
 use rss::Item;
 use std::io::Error;
 use std::time::SystemTime;
+use crate::db_run;
+use crate::service::mapping_service::MappingService;
+use crate::utils::podcast_builder::PodcastExtra;
 
 pub struct DB {
     conn: SqliteConnection,
@@ -39,13 +38,6 @@ impl DB {
         })
     }
 
-    pub fn get_podcasts(&mut self) -> Result<Vec<Podcast>, String> {
-        use crate::schema::podcasts::dsl::podcasts;
-        let result = podcasts
-            .load::<Podcast>(&mut self.conn)
-            .expect("Error loading podcasts");
-        Ok(result)
-    }
 
     pub fn get_podcast(&mut self, podcast_id_to_be_found: i32) -> Result<Podcast, Error> {
         use crate::schema::podcasts::dsl::podcasts;
@@ -539,9 +531,8 @@ impl DB {
     }
 
     pub fn update_podcast_fields(&mut self, podcast_extra: PodcastExtra) {
-        use crate::schema::podcasts::dsl::*;
 
-        diesel::update(podcasts)
+        db_run! {conn:  {diesel::update(podcasts)
             .filter(id.eq(podcast_extra.id))
             .set((
                 author.eq(podcast_extra.author),
@@ -553,6 +544,8 @@ impl DB {
             ))
             .execute(&mut self.conn)
             .expect("Error updating podcast episode");
+            }
+            }
     }
 
     pub fn get_settings(&mut self) -> Option<Setting> {
@@ -635,11 +628,11 @@ impl DB {
         &mut self,
         id_to_search: i32,
     ) -> Vec<PodcastEpisode> {
-        use crate::schema::podcast_episodes::dsl::*;
+
         podcast_episodes
             .filter(podcast_id.eq(id_to_search))
             .filter(status.eq("D"))
-            .load::<PodcastEpisode>(&mut self.conn)
-            .expect("Error loading podcast episode by id")
+            .ok()
+            .from_db()
     }
 }

@@ -1,6 +1,6 @@
 use std::io::Error;
 use crate::constants::constants::{PodcastType, ITUNES_URL};
-use crate::db::DB;
+use crate::db::dao::DB;
 use crate::models::itunes_models::Podcast;
 use crate::models::messages::BroadcastMessage;
 use crate::models::models::PodcastInsertModel;

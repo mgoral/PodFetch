@@ -1,4 +1,3 @@
-use crate::schema::*;
 use chrono::NaiveDateTime;
 use diesel::prelude::{Insertable, Queryable};
 use utoipa::ToSchema;
@@ -49,35 +48,7 @@ pub struct ResponseModel {
     pub results: Vec<ItunesModel>,
 }
 
-#[derive(Serialize, Deserialize, Queryable, Insertable, Clone, ToSchema)]
-pub struct Podcast {
-    #[diesel(sql_type = Integer)]
-    pub(crate) id: i32,
-    #[diesel(sql_type = Text)]
-    pub(crate) name: String,
-    #[diesel(sql_type = Text)]
-    pub directory: String,
-    #[diesel(sql_type = Text)]
-    pub(crate) rssfeed: String,
-    #[diesel(sql_type = Text)]
-    pub image_url: String,
-    #[diesel(sql_type = Text)]
-    pub favored: i32,
-    #[diesel(sql_type = Nullable<Text>)]
-    pub summary: Option<String>,
-    #[diesel(sql_type = Nullable<Text>)]
-    pub language: Option<String>,
-    #[diesel(sql_type = Nullable<Text>)]
-    pub explicit: Option<String>,
-    #[diesel(sql_type = Nullable<Text>)]
-    pub keywords: Option<String>,
-    #[diesel(sql_type = Nullable<Text>)]
-    pub last_build_date: Option<String>,
-    #[diesel(sql_type = Nullable<Text>)]
-    pub author: Option<String>,
-    pub active: bool,
-    pub original_image_url: String,
-}
+
 
 #[derive(Serialize, Deserialize, Queryable, Insertable, Clone, Debug, ToSchema)]
 pub struct PodcastEpisode {

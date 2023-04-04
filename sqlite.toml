@@ -1,0 +1,3 @@
+[print_schema]
+file = "src/sqlite-schema.rs"
+filter = { except_tables = ["spatial_ref_sys"] }

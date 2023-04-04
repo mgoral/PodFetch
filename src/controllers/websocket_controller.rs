@@ -1,5 +1,5 @@
 use crate::controllers::web_socket::WsConn;
-use crate::db::DB;
+use crate::db::dao::DB;
 use crate::models::itunes_models::PodcastEpisode;
 use crate::models::web_socket_message::Lobby;
 use crate::service::environment_service::EnvironmentService;

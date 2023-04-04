@@ -1,7 +1,4 @@
 use crate::models;
-use crate::models::models::{
-    PodCastAddModel, PodcastHistoryItem, PodcastWatchedEpisodeModel, PodcastWatchedPostModel,
-};
 use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};
 use actix_web::HttpResponse;
 use futures::future::LocalBoxFuture;

@@ -1,4 +1,4 @@
-use crate::db::DB;
+use crate::db::dao::DB;
 use crate::models::itunes_models::{Podcast, PodcastEpisode};
 use crate::service::file_service::FileService;
 use crate::service::mapping_service::MappingService;

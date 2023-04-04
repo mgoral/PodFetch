@@ -1,8 +1,8 @@
-use crate::db::DB;
 use crate::models::models::PodcastWatchedPostModel;
 use actix_web::web::Data;
 use actix_web::{get, post, web, HttpResponse, Responder};
 use std::sync::{Mutex, PoisonError};
+use crate::db::dao::DB;
 
 #[utoipa::path(
 context_path="/api/v1",

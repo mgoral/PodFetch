@@ -1,5 +1,5 @@
 use crate::constants::constants::PodcastType;
-use crate::db::DB;
+use crate::db::dao::DB;
 use crate::models::itunes_models::{Podcast, PodcastEpisode};
 use crate::models::messages::BroadcastMessage;
 use crate::models::models::Notification;

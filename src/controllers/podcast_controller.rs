@@ -1,4 +1,3 @@
-use crate::models::dto_models::PodcastFavorUpdateModel;
 use crate::models::models::{PodCastAddModel, PodcastInsertModel};
 use crate::models::opml_model::OpmlModel;
 use crate::models::search_type::SearchType::{ITUNES, PODINDEX};
@@ -24,6 +23,9 @@ use serde_json::{from_str, Value};
 use std::sync::{Mutex, PoisonError};
 use std::thread;
 use tokio::task::spawn_blocking;
+use crate::db::models::models::{PodCastAddModel, PodcastInsertModel};
+use crate::db::models::web_socket_message::Lobby;
+
 #[utoipa::path(
 context_path="/api/v1",
 responses(
@@ -40,7 +42,7 @@ pub async fn find_podcast_by_id(
     let id_num = from_str::<i32>(&id).unwrap();
     let podcast = podcast_service
         .lock()
-        .expect("Error acquiring lock")
+        .unwrap_or_else(PoisonError::into_inner)
         .get_podcast(id_num)
         .expect("Error getting podcast");
     let mapping_service = mapping_service.lock().expect("Error acquiring lock");

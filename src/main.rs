@@ -56,10 +56,8 @@ use crate::controllers::websocket_controller::{
 };
 pub use controllers::controller_utils::*;
 mod constants;
-mod db;
-mod models;
 mod service;
-use crate::db::DB;
+use crate::db::dao::DB;
 use crate::models::oidc_model::{CustomJwk, CustomJwkSet};
 use crate::models::web_socket_message::Lobby;
 use crate::service::environment_service::EnvironmentService;
@@ -73,8 +71,9 @@ use crate::service::rust_service::PodcastService;
 use crate::service::settings_service::SettingsService;
 
 mod config;
-pub mod schema;
 pub mod utils;
+mod db;
+mod error;
 
 async fn validator(
     req: ServiceRequest,
@@ -192,16 +191,12 @@ async fn index() -> impl Responder {
         )))
 }
 
-pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let lobby = Lobby::default();
 
     let chat_server = lobby.start();
-
-    let mut connection = establish_connection();
-    connection.run_pending_migrations(MIGRATIONS).unwrap();
 
     EnvironmentService::print_banner();
     init_logging();
