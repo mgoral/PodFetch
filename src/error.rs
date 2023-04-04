@@ -51,6 +51,7 @@ make_error! {
     Empty(Empty):     _no_source, _serialize,
     // Used to represent err! calls
     Simple(String):  _no_source,  _api_error,
+    Json(String):  _no_source,  _api_error,
     // Used for special return values, like 2FA errors
 }
 

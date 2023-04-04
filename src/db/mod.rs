@@ -1,4 +1,4 @@
-use std::{sync::Arc, time::Duration};
+use std::{env, sync::Arc, time::Duration};
 
 use diesel::{
     connection::SimpleConnection,
@@ -10,8 +10,8 @@ use tokio::{
     time::timeout,
 };
 
+use env::var;
 use crate::{err, error::{Error, MapResult}};
-use crate::config::app_config::CONFIG;
 
 #[cfg(sqlite)]
 #[path = "schemas/sqlite/schema.rs"]
@@ -116,7 +116,7 @@ macro_rules! generate_connections {
         impl DbPool {
             // For the given database URL, guess its type, run migrations, create pool, and return it
             pub fn from_config() -> Result<Self, Error> {
-                let url = CONFIG.database_url();
+                let url = var("DATABASE_URL")?;
                 let conn_type = DbConnType::from_url(&url)?;
 
                 match conn_type { $(
@@ -435,12 +435,15 @@ mod sqlite_migrations {
 #[cfg(mysql)]
 mod mysql_migrations {
     use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+    use dotenv::var;
+
     pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/mysql");
 
     pub fn run_migrations() -> Result<(), super::Error> {
         use diesel::{Connection, RunQueryDsl};
         // Make sure the database is up to date (create if it doesn't exist, or run the migrations)
-        let mut connection = diesel::mysql::MysqlConnection::establish(&crate::CONFIG.database_url())?;
+        let mut connection = diesel::mysql::MysqlConnection::establish(&var("DATABASE_URL")
+            .unwrap())?;
         // Disable Foreign Key Checks during migration
 
         // Scoped to a connection/session.
@@ -456,12 +459,14 @@ mod mysql_migrations {
 #[cfg(postgresql)]
 mod postgresql_migrations {
     use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+    use dotenv::var;
+
     pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/postgresql");
 
     pub fn run_migrations() -> Result<(), super::Error> {
         use diesel::{Connection, RunQueryDsl};
         // Make sure the database is up to date (create if it doesn't exist, or run the migrations)
-        let mut connection = diesel::pg::PgConnection::establish(&crate::CONFIG.database_url())?;
+        let mut connection = diesel::pg::PgConnection::establish(&var("DATABASE_URL").unwrap())?;
         // Disable Foreign Key Checks during migration
 
         // FIXME: Per https://www.postgresql.org/docs/12/sql-set-constraints.html,

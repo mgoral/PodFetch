@@ -1,7 +1,4 @@
 use crate::controllers::web_socket::WsConn;
-use crate::db::dao::DB;
-use crate::models::itunes_models::PodcastEpisode;
-use crate::models::web_socket_message::Lobby;
 use crate::service::environment_service::EnvironmentService;
 use crate::service::podcast_episode_service::PodcastEpisodeService;
 use actix::Addr;
@@ -15,6 +12,7 @@ use rss::{
     Category, CategoryBuilder, ChannelBuilder, EnclosureBuilder, GuidBuilder, Item, ItemBuilder,
 };
 use std::sync::Mutex;
+use crate::db::models::web_socket_message::Lobby;
 
 #[get("/ws")]
 pub async fn start_connection(

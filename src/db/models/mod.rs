@@ -9,3 +9,4 @@ pub mod web_socket_message;
 pub mod oidc_model;
 pub mod podcast;
 pub mod event_type;
+pub mod podcast_episode;
