@@ -86,7 +86,28 @@ impl Podcast {
             .get_result::<Podcast>(conn)
             .expect("Error inserting podcast")
         }}
+    }
 
+    pub async fn update_podcast_image( id: &str, image_url: &str, conn: &mut DbConn){
+        db_run!{
+            conn:{
+                    dsl::update(podcasts::table.filter(podcasts::directory.eq(id)))
+                    .set(podcasts::image_url.eq(image_url))
+                    .execute(conn)
+                    .expect("Error updating podcast episode");
+            }
+        }
+    }
+
+    pub async fn update_podcast_favored(id: &i32, favor:bool, conn: &mut DbConn)->Result<(), String>{
+        db_run!{
+            conn:{
+                dsl::update(podcasts::table.filter(podcasts::id.eq(id)))
+                .set(podcasts::favored.eq(favor))
+                .execute(conn)
+                .expect("Error updating podcast episode");
+            }
+        }
     }
 }
 
