@@ -3,7 +3,7 @@
 //
 use std::error::Error as StdError;
 
-use crate::db::models::event_type::EventType;
+
 macro_rules! make_error {
     ( $( $name:ident ( $ty:ty ): $src_fn:expr, $usr_msg_fun:expr ),+ $(,)? ) => {
         const BAD_REQUEST: u16 = 400;
@@ -37,6 +37,7 @@ macro_rules! make_error {
     };
 }
 
+use diesel::r2d2::PoolError as R2d2Err;
 
 #[derive(Serialize)]
 pub struct Empty {}
@@ -51,8 +52,9 @@ make_error! {
     Empty(Empty):     _no_source, _serialize,
     // Used to represent err! calls
     Simple(String):  _no_source,  _api_error,
-    Json(String):  _no_source,  _api_error,
     // Used for special return values, like 2FA errors
+
+    DieselCon(DieselConErr): _has_source, _api_error,
 }
 
 impl std::fmt::Debug for Error {
@@ -68,7 +70,6 @@ impl std::fmt::Debug for Error {
                         write!(f, "{}. {}", self.message, s)
                     }
                 }
-                ErrorKind::Json(_) => write!(f, "{}", self.message),
                 _ => unreachable!(),
             },
         }
@@ -158,7 +159,13 @@ fn _api_error(_: &impl std::any::Any, msg: &str) -> String {
     _serialize(&json, "")
 }
 
+//
+// Rocket responder impl
+//
+use std::io::Cursor;
 use serde_json::json;
+
+
 
 //
 // Error return macros

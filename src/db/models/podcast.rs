@@ -8,7 +8,6 @@ db_object! {
     #[derive(Serialize, Deserialize, Queryable, Insertable, Clone, ToSchema)]
     #[diesel(table_name = podcasts)]
     #[diesel(treat_none_as_null = true)]
-    #[diesel(primary_key(id))]
 pub struct Podcast {
     #[diesel(sql_type = Integer)]
     pub(crate) id: i32,
@@ -99,7 +98,7 @@ impl Podcast {
         }
     }
 
-    pub async fn update_podcast_favored(id: &i32, favor:bool, conn: &mut DbConn)->Result<(), String>{
+    pub async fn update_podcast_favored(id: &i32, favor:bool, conn: &mut DbConn){
         db_run!{
             conn:{
                 dsl::update(podcasts::table.filter(podcasts::id.eq(id)))
@@ -110,7 +109,7 @@ impl Podcast {
         }
     }
 
-    pub async fn update_podcast_active(&mut conn: DbConn, podcast_id:i32){
+    pub async fn update_podcast_active(conn:&mut  DbConn, podcast_id:i32){
         let podcast_found = Podcast::find_podcast(conn, podcast_id).await.unwrap();
         db_run!{
             conn:{

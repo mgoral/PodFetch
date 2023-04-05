@@ -27,7 +27,7 @@ pub struct PodcastEpisode {
 
 impl PodcastEpisode {
 
-    pub async fn get_podcast_episodes_older_than_days(&mut conn:DbConn, days:i32) {
+    pub async fn get_podcast_episodes_older_than_days(conn: &mut DbConn, days:i32) {
         db_run!{
             conn:{
                 podcast_episodes::table
@@ -40,7 +40,7 @@ impl PodcastEpisode {
         }
     }
 
-    pub async fn get_downloaded_episodes(&mut conn:DbConn) {
+    pub async fn get_downloaded_episodes(conn: &mut DbConn) {
         db_run!{
             conn:{
                 podcast_episodes::table
@@ -51,7 +51,7 @@ impl PodcastEpisode {
         }
     }
 
-    pub async fn query_for_podcast_episodes(&mut conn:DbConn, query: &str)
+    pub async fn query_for_podcast_episodes(conn:&mut DbConn, query: &str)
         ->Vec<PodcastEpisode> {
         db_run!{
             conn:{
@@ -65,7 +65,7 @@ impl PodcastEpisode {
         }
     }
 
-    pub async fn update_podcast_episode_status(&mut conn:DbConn, download_url_of_episode: &str,
+    pub async fn update_podcast_episode_status(conn:&mut DbConn, download_url_of_episode: &str,
                                                status: &str) {
         db_run!{
             conn:{
@@ -81,7 +81,7 @@ impl PodcastEpisode {
         }
     }
 
-    pub async fn check_if_downloaded(&mut conn:DbConn, download_url_of_episode: &str) ->bool {
+    pub async fn check_if_downloaded(conn:&mut DbConn, download_url_of_episode: &str) ->bool {
         db_run!{
             conn:{
                 let result = podcast_episodes::table
@@ -107,7 +107,8 @@ impl PodcastEpisode {
         }
     }
 
-    pub async fn get_podcast_episodes_of_podcast(&mut conn:DbConn, podcast_id: i32, last_id: Option<String>) ->Vec<PodcastEpisode> {
+    pub async fn get_podcast_episodes_of_podcast(conn:&mut DbConn, podcast_id: i32, last_id:
+    Option<String>) ->Vec<PodcastEpisode> {
         db_run!{
             conn:{
 match last_id {
@@ -132,7 +133,8 @@ match last_id {
         }
     }
 
-    pub async fn get_last_5_podcast_episodes_of_podcast(&mut conn:DbConn, podcast_id: i32) ->Vec<PodcastEpisode> {
+    pub async fn get_last_5_podcast_episodes_of_podcast(conn:&mut DbConn, podcast_id: i32)
+        ->Vec<PodcastEpisode> {
         db_run!{
             conn:{
                 podcast_episodes::table
@@ -145,7 +147,7 @@ match last_id {
         }
     }
 
-    pub async fn add_podcast_episode(&mut conn:DbConn, podcast_episode: PodcastEpisode) {
+    pub async fn add_podcast_episode(conn:&mut DbConn, podcast_episode: PodcastEpisode) {
         db_run!{
             conn:{
                 diesel::insert_into(podcast_episodes::table)
