@@ -168,3 +168,7 @@
     position: absolute;
     bottom: 10%;
 }
+
+[aria-label="Sidebar"]{
+    transition: opacity 0.5s;
+}

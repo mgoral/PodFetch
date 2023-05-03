@@ -8,7 +8,8 @@ export const SideBar  = ()=>{
     const config = useAppSelector(state => state.common.configModel)
 
 
-    return <aside className={`w-full h-full float-left ${sideBarCollapsed?'hidden': 'col-span-6 md:col-span-1'} z-10 w-full bg-gray-800 flex  border-none sticky`} aria-label="Sidebar">
+    return <aside className={` float-left ${sideBarCollapsed?'invisible overflow-hidden': 'col-span-6 ' +
+        'visible w-full h-full overflow-visible md:col-span-1'} z-10 bg-gray-800 flex  border-none sticky`} aria-label="Sidebar">
         <div className="py-4 px-3 bg-gray-800 h-full w-full">
             <ul className="space-y-2">
                 <SideBarItem highlightPath={'./'} translationkey={t('homepage')} icon={<i className="fa-solid fa-house fa-xl"></i>}/>
