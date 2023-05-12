@@ -27,7 +27,7 @@
 [target."x86_64-unknown-linux-musl"]
 image.name = "docker-registry.schwanzer.online/public/muslcross:arm64"
 image.toolchain = ["linux/arm64=aarch64-unknown-linux-musl","x86_64-unknown-linux-musl", "armv7-unknown-linux-musleabi"]
-pre-build = ["apt clean && apt upgrade -y && apt install gcc libssl-dev musl musl-dev musl-tools -y"]
+pre-build = ["apt clean && apt upgrade -y && apt  --assume-yes install gcc libssl-dev musl musl-dev musl-tools"]
 
 [target."aarch64-unknown-linux-musl"]
 image.name = "docker-registry.schwanzer.online/public/muslcross:arm64"
