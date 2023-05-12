@@ -1,0 +1,11 @@
+sed '3d' /etc/apt/sources.list
+sed '14d' /etc/apt/sources.list
+sed '24d' /etc/apt/sources.list
+sed '8d' /etc/apt/sources.list
+sed '16d' /etc/apt/sources.list
+sed '26d' /etc/apt/sources.list
+sed '34d' /etc/apt/sources.list
+sed '44d' /etc/apt/sources.list
+sed '48' /etc/apt/sources.list
+sed '46d' /etc/apt/sources.list
+
