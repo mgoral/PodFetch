@@ -27,18 +27,18 @@
 [target."x86_64-unknown-linux-musl"]
 image.name = "docker-registry.schwanzer.online/public/muslcross:arm64"
 image.toolchain = ["linux/arm64=aarch64-unknown-linux-musl","x86_64-unknown-linux-musl", "armv7-unknown-linux-musleabi"]
-pre-build = ["dpkg --add-architecture $CROSS_DEB_ARCH&& apt update && apt install gcc libssl-dev:$CROSS_DEB_ARCH"]
+pre-build = ["dpkg --add-architecture $CROSS_DEB_ARCH&& apt update && apt install gcc libssl-dev:amd64"]
 
 [target."aarch64-unknown-linux-musl"]
 image.name = "docker-registry.schwanzer.online/public/muslcross:arm64"
 image.toolchain = ["linux/arm64=aarch64-unknown-linux-musl","x86_64-unknown-linux-musl", "armv7-unknown-linux-musleabi"]
-pre-build = ["dpkg --add-architecture $CROSS_DEB_ARCH&& apt update && apt install gcc libssl-dev:$CROSS_DEB_ARCH"]
+pre-build = ["dpkg --add-architecture $CROSS_DEB_ARCH&& apt update && apt install gcc libssl-dev::arm64"]
 env.passthrough = ["RUSTFLAGS","TARGET_CC=gcc"]
 
 [target."armv7-unknown-linux-musleabihf"]
 image.name = "docker-registry.schwanzer.online/public/muslcross:arm64"
 image.toolchain = ["linux/arm64=aarch64-unknown-linux-musl","x86_64-unknown-linux-musl", "armv7-unknown-linux-musleabi"]
-pre-build = ["dpkg --add-architecture $CROSS_DEB_ARCH&& apt update && apt install gcc libssl-dev:$CROSS_DEB_ARCH"]
+pre-build = ["dpkg --add-architecture $CROSS_DEB_ARCH&& apt update && apt install gcc libssl-dev:armhf"]
 env.passthrough = ["RUSTFLAGS","TARGET_CC=gcc", "CFLAGS=-mno-outline-atomics"]
 
 
