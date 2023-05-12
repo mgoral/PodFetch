@@ -27,18 +27,18 @@
 [target."x86_64-unknown-linux-musl"]
 image.name = "docker-registry.schwanzer.online/public/muslcross:arm64"
 image.toolchain = ["linux/arm64=aarch64-unknown-linux-musl","x86_64-unknown-linux-musl", "armv7-unknown-linux-musleabi"]
-pre-build = ["apt clean && apt upgrade -y && apt install gcc libssl-dev -y"]
+pre-build = ["apt clean && apt upgrade -y && apt install gcc libssl-dev musl-tools -y"]
 
 [target."aarch64-unknown-linux-musl"]
 image.name = "docker-registry.schwanzer.online/public/muslcross:arm64"
 image.toolchain = ["linux/arm64=aarch64-unknown-linux-musl","x86_64-unknown-linux-musl", "armv7-unknown-linux-musleabi"]
-pre-build = ["apt clean && apt install gcc libssl-dev::arm64 -y"]
+pre-build = ["apt clean && apt install gcc libssl-dev::arm64 musl-tools -y"]
 env.passthrough = ["RUSTFLAGS","TARGET_CC=gcc"]
 
 [target."armv7-unknown-linux-musleabihf"]
 image.name = "docker-registry.schwanzer.online/public/muslcross:arm64"
 image.toolchain = ["linux/arm64=aarch64-unknown-linux-musl","x86_64-unknown-linux-musl", "armv7-unknown-linux-musleabi"]
-pre-build = ["apt clean && apt install gcc libssl-dev:armhf -y"]
+pre-build = ["apt clean && apt install gcc libssl-dev:armhf musl-tools -y"]
 env.passthrough = ["RUSTFLAGS","TARGET_CC=gcc", "CFLAGS=-mno-outline-atomics"]
 
 
