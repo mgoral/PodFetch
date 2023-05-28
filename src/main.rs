@@ -23,6 +23,7 @@ use log::{info};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 use diesel::r2d2::{ConnectionManager};
+use diesel::sqlite::SqliteQueryBuilder;
 use r2d2::{Pool};
 use regex::Regex;
 mod controllers;
@@ -54,6 +55,7 @@ mod db;
 mod models;
 mod service;
 use crate::db::DB;
+use crate::dbconfig::AnyConnection;
 use crate::gpodder::parametrization::get_client_parametrization;
 use crate::gpodder::routes::get_gpodder_api;
 use crate::models::session::Session;
@@ -81,9 +83,12 @@ mod dbconfig;
 
 import_database_connections!();
 
+
+type MyQueryBuilder = SqliteQueryBuilder;
+
 type DbPool = Pool<ConnectionManager<DbConnection>>;
 
-import_database_config!();
+type DbConnection = AnyConnection;
 
 pub fn run_poll(
     mut podcast_service: PodcastService,
