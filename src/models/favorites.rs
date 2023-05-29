@@ -21,7 +21,7 @@ pub struct Favorite{
 }
 
 impl Favorite{
-    pub fn delete_by_username(username1: String, conn: &mut DbConnection) -> Result<(),
+    pub fn delete_by_username(username1: String, conn: &mut AnyConnection) -> Result<(),
         diesel::result::Error>{
         use crate::dbconfig::schema::favorites::dsl::*;
         diesel::delete(favorites.filter(username.eq(username1))).execute(conn)?;

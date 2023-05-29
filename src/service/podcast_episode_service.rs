@@ -17,7 +17,7 @@ use reqwest::blocking::ClientBuilder;
 use reqwest::header::{ACCEPT, HeaderMap};
 use rss::Channel;
 
-use crate::DbConnection;
+use crate::AnyConnection;
 use crate::service::environment_service::EnvironmentService;
 use crate::service::settings_service::SettingsService;
 use crate::service::telegram_api::send_new_episode_notification;
@@ -40,7 +40,7 @@ impl PodcastEpisodeService {
         podcast_episode: PodcastEpisode,
         podcast: Podcast,
         lobby: Option<web::Data<Addr<Lobby>>>,
-        conn: &mut DbConnection,
+        conn: &mut AnyConnection,
     ) {
         let mut settings_service = SettingsService::new();
         let settings = settings_service.get_settings(DB::new().unwrap(),conn).unwrap();
@@ -108,7 +108,7 @@ impl PodcastEpisodeService {
         db: &mut DB,
         podcast_episode_cloned: PodcastEpisode,
         podcast_cloned: Podcast,
-        conn: &mut DbConnection,
+        conn: &mut AnyConnection,
     ) -> PodcastEpisode {
         log::info!("Downloading podcast episode: {}", podcast_episode.name);
         let mut download_service = DownloadService::new();
@@ -128,7 +128,7 @@ impl PodcastEpisodeService {
         return podcast;
     }
 
-    pub fn get_last_n_podcast_episodes(conn: &mut DbConnection, podcast: Podcast) ->
+    pub fn get_last_n_podcast_episodes(conn: &mut AnyConnection, podcast: Podcast) ->
                                                                              Vec<PodcastEpisode> {
 
         let mut settings_service = SettingsService::new();
@@ -138,7 +138,7 @@ impl PodcastEpisodeService {
     }
 
     // Used for creating/updating podcasts
-    pub fn insert_podcast_episodes(&mut self, conn: &mut DbConnection, podcast: Podcast) ->
+    pub fn insert_podcast_episodes(&mut self, conn: &mut AnyConnection, podcast: Podcast) ->
                                                                              Vec<PodcastEpisode> {
         let client = ClientBuilder::new().build().unwrap();
         let mut header_map = HeaderMap::new();

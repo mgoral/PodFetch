@@ -4,7 +4,7 @@ use diesel::QueryDsl;
 use diesel::ExpressionMethods;
 use diesel::AsChangeset;
 use diesel::Queryable;
-use crate::DbConnection;
+use crate::AnyConnection;
 
 
 #[derive(Debug, Clone, Serialize, Deserialize, Insertable, AsChangeset, Queryable)]
@@ -30,7 +30,7 @@ impl Filter{
         }
     }
 
-    pub fn save_filter(self, conn: &mut DbConnection) -> Result<(), diesel::result::Error>{
+    pub fn save_filter(self, conn: &mut AnyConnection) -> Result<(), diesel::result::Error>{
         use crate::dbconfig::schema::filters::dsl::*;
 
         let opt_filter = filters.filter(username.eq(&self.username)).first::<Filter>(conn)
@@ -48,7 +48,7 @@ impl Filter{
         Ok(())
     }
 
-    pub async fn get_filter_by_username(username1: String, conn: &mut  DbConnection) ->
+    pub async fn get_filter_by_username(username1: String, conn: &mut  AnyConnection) ->
                                                                                    Result<Option<Filter>, diesel::result::Error>{
         use crate::dbconfig::schema::filters::dsl::*;
         let res =   filters.filter(username.eq(username1)).first::<Filter>(conn)
@@ -56,7 +56,7 @@ impl Filter{
         Ok(res)
     }
 
-    pub fn save_decision_for_timeline(username_to_search: String, conn: &mut DbConnection,
+    pub fn save_decision_for_timeline(username_to_search: String, conn: &mut AnyConnection,
                                       only_favored_to_insert:
     bool){
         use crate::dbconfig::schema::filters::only_favored;

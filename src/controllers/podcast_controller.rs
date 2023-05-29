@@ -353,7 +353,7 @@ pub async fn add_podcast_from_podindex(
     HttpResponse::Ok().into()
 }
 
-fn start_download_podindex(id: i32, lobby: Data<Addr<Lobby>>, conn: &mut DbConnection)
+fn start_download_podindex(id: i32, lobby: Data<Addr<Lobby>>, conn: &mut AnyConnection)
     ->Result<Podcast, PodFetchError> {
     let rt = tokio::runtime::Runtime::new().unwrap();
     rt.block_on(async {

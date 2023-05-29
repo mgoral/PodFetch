@@ -10,7 +10,7 @@ use crate::service::environment_service::EnvironmentService;
 use crate::service::file_service::FileService;
 use crate::service::mapping_service::MappingService;
 use crate::service::podcast_episode_service::PodcastEpisodeService;
-use crate::{DbConnection, unwrap_string};
+use crate::{AnyConnection, unwrap_string};
 use actix::Addr;
 use actix_web::web::Data;
 use reqwest::header::{HeaderMap, HeaderValue};
@@ -72,7 +72,7 @@ impl PodcastService {
         return result.json().await.unwrap();
     }
 
-    pub async fn insert_podcast_from_podindex(&mut self, conn: &mut DbConnection, id: i32,
+    pub async fn insert_podcast_from_podindex(&mut self, conn: &mut AnyConnection, id: i32,
                                               lobby: Data<Addr<Lobby>>) ->Result<Podcast,
         PodFetchError>{
         let mapping_service = MappingService::new();
@@ -106,7 +106,7 @@ impl PodcastService {
 
     pub async fn handle_insert_of_podcast(
         &mut self,
-        conn: &mut DbConnection,
+        conn: &mut AnyConnection,
         podcast_insert: PodcastInsertModel,
         mapping_service: MappingService,
         lobby: Data<Addr<Lobby>>) ->Result<Podcast,PodFetchError>{
@@ -185,7 +185,7 @@ impl PodcastService {
         &mut self,
         podcast: Podcast,
         lobby: Option<Data<Addr<Lobby>>>,
-        conn: &mut DbConnection
+        conn: &mut AnyConnection
     ) {
         let mut db = DB::new().unwrap();
         let settings = db.get_settings(conn);
@@ -212,7 +212,7 @@ impl PodcastService {
     }
 
     pub fn refresh_podcast(&mut self, podcast: Podcast, lobby: Data<Addr<Lobby>>, conn:&mut
-    DbConnection) {
+    AnyConnection) {
         log::info!("Refreshing podcast: {}", podcast.name);
         self.podcast_episode_service
             .insert_podcast_episodes(conn, podcast.clone());
@@ -220,7 +220,7 @@ impl PodcastService {
     }
 
     pub fn update_favor_podcast(&mut self, id: i32, x: bool, username: String, mut db:
-    MutexGuard<DB>, conn: &mut DbConnection) {
+    MutexGuard<DB>, conn: &mut AnyConnection) {
         db.update_podcast_favor(&id, x, conn,username).unwrap();
     }
 

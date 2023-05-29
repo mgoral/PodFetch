@@ -1,3 +1,4 @@
+use crate::dbconfig::AnyConnection;
 use crate::DbConnection;
 use crate::models::itunes_models::{Podcast, PodcastEpisode};
 use crate::service::file_service::{prepare_podcast_episode_title_to_directory};
@@ -23,7 +24,7 @@ impl FilenameBuilder {
         self
     }
 
-    pub fn with_episode(mut self, podcast_episode: PodcastEpisode,conn: &mut DbConnection) -> FilenameBuilder {
+    pub fn with_episode(mut self, podcast_episode: PodcastEpisode,conn: &mut AnyConnection) -> FilenameBuilder {
         self.episode = prepare_podcast_episode_title_to_directory(podcast_episode.clone(), conn);
         self.raw_episode = podcast_episode;
         self
@@ -49,7 +50,7 @@ impl FilenameBuilder {
         self
     }
 
-    pub fn with_raw_directory(mut self,conn: &mut DbConnection) -> FilenameBuilder {
+    pub fn with_raw_directory(mut self,conn: &mut AnyConnection) -> FilenameBuilder {
         self.directory = PathService::get_image_path(
             &self.podcast.clone().directory_name,
             Some(self.raw_episode.clone()),
@@ -66,7 +67,7 @@ impl FilenameBuilder {
         self
     }
 
-    pub fn build(self,conn: &mut DbConnection)->(String, String){
+    pub fn build(self,conn: &mut AnyConnection)->(String, String){
         if self.raw_filename{
             let resulting_directory = self.clone().create_podcast_episode_dir(self.directory.clone
             (),conn);
@@ -83,7 +84,7 @@ impl FilenameBuilder {
     }
 
 
-    fn create_podcast_episode_dir(self,dirname:String,conn: &mut DbConnection)->String{
+    fn create_podcast_episode_dir(self,dirname:String,conn: &mut AnyConnection)->String{
         PathService::check_if_podcast_episode_directory_available
             (&dirname, self.podcast, conn)
     }

@@ -1,6 +1,6 @@
 use std::io;
 use std::path::Path;
-use crate::DbConnection;
+use crate::AnyConnection;
 use crate::models::itunes_models::{Podcast, PodcastEpisode};
 
 use crate::service::file_service::{FileService, prepare_podcast_episode_title_to_directory};
@@ -10,7 +10,7 @@ pub struct PathService {}
 
 impl PathService {
     pub fn get_podcast_episode_path(directory: &str, episode: Option<PodcastEpisode>, suffix:
-    &str, filename: &str, conn: &mut DbConnection)
+    &str, filename: &str, conn: &mut AnyConnection)
         -> String {
         return match episode {
             Some(episode) => {
@@ -25,7 +25,7 @@ impl PathService {
 
     pub fn get_image_path(directory: &str, episode: Option<PodcastEpisode>, _suffix: &str,
                           filename: &str,
-                          conn: &mut DbConnection) -> String {
+                          conn: &mut AnyConnection) -> String {
         return match episode {
             Some(episode) => {
                 format!("{}/{}", directory, prepare_podcast_episode_title_to_directory(episode,
@@ -41,7 +41,7 @@ impl PathService {
         return format!("{}/image.{}", directory, suffix);
     }
 
-    pub fn check_if_podcast_episode_directory_available(base_path:&str, podcast: Podcast,conn: &mut DbConnection) ->
+    pub fn check_if_podcast_episode_directory_available(base_path:&str, podcast: Podcast,conn: &mut AnyConnection) ->
                                                                                           String {
         let mut i = 0;
         if !Path::new(&base_path).exists() {
@@ -65,7 +65,7 @@ impl PathService {
         return final_path;
     }
 
-    fn handle_error_when_creating_directory(podcast:Podcast,conn: &mut DbConnection){
+    fn handle_error_when_creating_directory(podcast:Podcast,conn: &mut AnyConnection){
                 match FileService::create_podcast_root_directory_exists(){
                     Ok(_) => {}
                     Err(e) => {

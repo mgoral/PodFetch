@@ -1,5 +1,5 @@
 use crate::db::DB;
-use crate::DbConnection;
+use crate::AnyConnection;
 use crate::models::models::Notification;
 
 #[derive(Clone)]
@@ -12,12 +12,12 @@ impl NotificationService {
         }
     }
 
-    pub fn get_unread_notifications(&mut self, mut db:DB, conn:&mut DbConnection)
+    pub fn get_unread_notifications(&mut self, mut db:DB, conn:&mut AnyConnection)
         ->Result<Vec<Notification>, String>{
         db.get_unread_notifications(conn)
     }
 
-    pub fn update_status_of_notification(&mut self, id: i32, status: &str, mut db:DB,conn:&mut DbConnection) -> Result<(),
+    pub fn update_status_of_notification(&mut self, id: i32, status: &str, mut db:DB,conn:&mut AnyConnection) -> Result<(),
         String> {
         db.update_status_of_notification(id, status, conn)
     }

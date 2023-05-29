@@ -23,7 +23,6 @@ use log::{info};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 use diesel::r2d2::{ConnectionManager};
-use diesel::sqlite::SqliteQueryBuilder;
 use r2d2::{Pool};
 use regex::Regex;
 mod controllers;
@@ -86,7 +85,7 @@ import_database_connections!();
 
 type MyQueryBuilder = SqliteQueryBuilder;
 
-type DbPool = Pool<ConnectionManager<DbConnection>>;
+type DbPool = Pool<ConnectionManager<AnyConnection>>;
 
 type DbConnection = AnyConnection;
 

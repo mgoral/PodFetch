@@ -10,7 +10,7 @@ use diesel::ExpressionMethods;
 use dotenv::var;
 use crate::constants::constants::{BASIC_AUTH, OIDC_AUTH, Role, STANDARD_USER, USERNAME};
 use crate::dbconfig::schema::users;
-use crate::DbConnection;
+use crate::AnyConnection;
 
 #[derive(Serialize, Deserialize, Queryable, Insertable, Clone, ToSchema, PartialEq, Debug, AsChangeset)]
 #[serde(rename_all = "camelCase")]
@@ -47,7 +47,7 @@ impl User{
         }
     }
 
-    pub fn find_by_username(username_to_find: &str, conn: &mut DbConnection) -> Option<User> {
+    pub fn find_by_username(username_to_find: &str, conn: &mut AnyConnection) -> Option<User> {
         use crate::dbconfig::schema::users::dsl::*;
         match var(USERNAME) {
              Ok(res)=> {
@@ -64,7 +64,7 @@ impl User{
             .unwrap()
     }
 
-    pub fn insert_user(&mut self, conn: &mut DbConnection) -> Result<User, Error> {
+    pub fn insert_user(&mut self, conn: &mut AnyConnection) -> Result<User, Error> {
         use crate::dbconfig::schema::users::dsl::*;
 
         match  var(USERNAME){
@@ -87,12 +87,12 @@ impl User{
         Ok(res)
     }
 
-    pub fn delete_user(&self, conn: &mut DbConnection) -> Result<usize, diesel::result::Error> {
+    pub fn delete_user(&self, conn: &mut AnyConnection) -> Result<usize, diesel::result::Error> {
         diesel::delete(users::table.filter(users::id.eq(self.id)))
             .execute(conn)
     }
 
-    pub fn update_role(&self, conn: &mut DbConnection) -> Result<UserWithoutPassword, diesel::result::Error> {
+    pub fn update_role(&self, conn: &mut AnyConnection) -> Result<UserWithoutPassword, diesel::result::Error> {
         let user = diesel::update(users::table.filter(users::id.eq(self.id)))
             .set(users::role.eq(self.role.clone()))
             .get_result::<User>(conn);
@@ -132,7 +132,7 @@ impl User{
         }
     }
 
-    pub fn find_all_users(conn: &mut DbConnection) -> Vec<UserWithoutPassword> {
+    pub fn find_all_users(conn: &mut AnyConnection) -> Vec<UserWithoutPassword> {
         use crate::dbconfig::schema::users::dsl::*;
 
         let loaded_users = users.load::<User>(conn).unwrap();
@@ -163,7 +163,7 @@ impl User{
     }
 
 
-    pub fn check_if_admin_or_uploader(username: &Option<String>, conn: &mut DbConnection) ->
+    pub fn check_if_admin_or_uploader(username: &Option<String>, conn: &mut AnyConnection) ->
                                                                                               Option<HttpResponse> {
         if username.is_some(){
             let found_user = User::find_by_username(&username.clone().unwrap(), conn);
@@ -178,7 +178,7 @@ impl User{
         None
     }
 
-    pub fn check_if_admin(username: &Option<String>, conn: &mut DbConnection) ->
+    pub fn check_if_admin(username: &Option<String>, conn: &mut AnyConnection) ->
                                                                                               Option<HttpResponse> {
         if username.is_some(){
             let found_user = User::find_by_username(&username.clone().unwrap(), conn);

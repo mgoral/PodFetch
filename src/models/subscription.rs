@@ -12,7 +12,7 @@ use diesel::sql_types::{Integer, Text, Nullable, Timestamp};
 use crate::dbconfig::schema::subscriptions;
 use crate::utils::time::get_current_timestamp;
 use diesel::OptionalExtension;
-use crate::DbConnection;
+use crate::AnyConnection;
 
 #[derive(Debug, Serialize, Deserialize,QueryableByName, Queryable,AsChangeset,Insertable, Clone, ToSchema)]
 #[diesel(treat_none_as_null = true)]
@@ -42,7 +42,7 @@ impl Subscription{
             deleted: None
         }
     }
-    pub fn delete_by_username(username1: &str, conn: &mut DbConnection) ->
+    pub fn delete_by_username(username1: &str, conn: &mut AnyConnection) ->
                                                                                          Result<(), Error>{
         use crate::dbconfig::schema::subscriptions::dsl::*;
         diesel::delete(subscriptions.filter(username.eq(username1)))
@@ -62,7 +62,7 @@ pub struct SubscriptionChangesToClient {
 
 impl SubscriptionChangesToClient {
     pub async fn get_device_subscriptions(device_id: &str, username: &str, since: i32,
-                                          conn: &mut DbConnection) -> Result<SubscriptionChangesToClient, Error>{
+                                          conn: &mut AnyConnection) -> Result<SubscriptionChangesToClient, Error>{
         let since = NaiveDateTime::from_timestamp_opt(since as i64, 0).unwrap();
       let res:Vec<Subscription> = subscriptions::table
           .filter(subscriptions::username.eq(username))
@@ -84,7 +84,7 @@ impl SubscriptionChangesToClient {
     }
 
     pub async fn update_subscriptions(device_id: &str, username: &str, upload_request:
-    web::Json<SubscriptionUpdateRequest>, conn: &mut DbConnection)-> Result<Vec<Vec<String>>,
+    web::Json<SubscriptionUpdateRequest>, conn: &mut AnyConnection)-> Result<Vec<Vec<String>>,
         Error>{
         use crate::dbconfig::schema::subscriptions::dsl as dsl_types;
         use crate::dbconfig::schema::subscriptions::dsl::subscriptions;
@@ -144,7 +144,7 @@ impl SubscriptionChangesToClient {
     }
 
    pub fn  find_by_podcast(username_1: String, deviceid_1: String, podcast_1: String, conn:
-   &mut DbConnection) -> Result<Option<Subscription>, Error>{
+   &mut AnyConnection) -> Result<Option<Subscription>, Error>{
        use crate::dbconfig::schema::subscriptions::dsl::*;
 
        let res = subscriptions.filter(username.eq(username_1).and(device.eq

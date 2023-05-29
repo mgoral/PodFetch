@@ -7,9 +7,11 @@ use crate::dbconfig::schema::episodes;
 use utoipa::ToSchema;
 use diesel::sql_types::{Integer, Text, Nullable, Timestamp};
 use diesel::ExpressionMethods;
+use diesel::pg::PgQueryBuilder;
 use diesel::query_builder::QueryBuilder;
+use diesel::sqlite::SqliteQueryBuilder;
 use crate::db::DB;
-use crate::{DbConnection, MyQueryBuilder};
+use crate::{AnyConnection, MyQueryBuilder};
 use crate::models::itunes_models::{Podcast, PodcastEpisode};
 use crate::models::models::{PodcastHistoryItem, PodcastWatchedEpisodeModelWithPodcastEpisode};
 
@@ -41,7 +43,7 @@ pub struct Episode{
 
 
 impl Episode{
-    pub fn insert_episode(&self, conn: &mut DbConnection) -> Result<Episode, diesel::result::Error> {
+    pub fn insert_episode(&self, conn: &mut AnyConnection) -> Result<Episode, diesel::result::Error> {
         use crate::dbconfig::schema::episodes::dsl::*;
 
         let res = episodes.filter(timestamp.eq(self.clone().timestamp)
@@ -102,7 +104,7 @@ impl Episode{
             total: episode_dto.total,
         }
     }
-    pub async fn get_actions_by_username(username1: String, conn: &mut DbConnection, since_date: Option<NaiveDateTime>) ->Vec<Episode>{
+    pub async fn get_actions_by_username(username1: String, conn: &mut AnyConnection, since_date: Option<NaiveDateTime>) ->Vec<Episode>{
         use crate::dbconfig::schema::episodes::username;
         use crate::dbconfig::schema::episodes::dsl::episodes;
         use crate::dbconfig::schema::episodes::dsl::timestamp;
@@ -123,10 +125,16 @@ impl Episode{
         }
     }
 
-    pub fn get_watch_log_by_username_and_episode(username1: String, conn: &mut DbConnection,
+    pub fn get_watch_log_by_username_and_episode(username1: String, conn: &mut AnyConnection,
                                                  episode_1: String) ->Option<Episode>{
 
-        let mut builder = MyQueryBuilder::new();
+
+        let mut builder: dyn QueryBuilder<AnyConnection>;
+
+        builder = match conn {
+            AnyConnection::Sqlite(c) => SqliteQueryBuilder::new(),
+            AnyConnection::Pg(c) => PgQueryBuilder::new(),
+        };
 
         builder.push_sql("SELECT * FROM (SELECT * FROM episodes,podcasts WHERE username=");
         builder.push_bind_param();
@@ -161,7 +169,7 @@ impl Episode{
         }
     }
 
-    pub fn get_last_watched_episodes(username1: String, conn: &mut DbConnection)
+    pub fn get_last_watched_episodes(username1: String, conn: &mut AnyConnection)
         ->Vec<PodcastWatchedEpisodeModelWithPodcastEpisode>{
 
 
@@ -211,7 +219,7 @@ impl Episode{
         }).collect()
     }
 
-    pub fn delete_by_username_and_episode(username1: String, conn: &mut DbConnection) ->Result<(),Error>{
+    pub fn delete_by_username_and_episode(username1: String, conn: &mut AnyConnection) ->Result<(),Error>{
         use crate::dbconfig::schema::episodes::username;
         use crate::dbconfig::schema::episodes::dsl::episodes;
         diesel::delete(episodes.filter(username.eq(username1)))

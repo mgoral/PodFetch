@@ -7,7 +7,7 @@ use crate::models::user::{User, UserWithoutPassword};
 use crate::service::environment_service::EnvironmentService;
 use sha256::{digest};
 use crate::constants::constants::Role;
-use crate::DbConnection;
+use crate::AnyConnection;
 
 pub struct UserManagementService{
 
@@ -39,7 +39,7 @@ impl UserManagementService {
      * Performs the onboarding with a valid
      */
     pub fn onboard_user(username: String, password: String, invite_id: String, conn: &mut
-    DbConnection)->Result<User,
+    AnyConnection)->Result<User,
         PodFetchError>{
 
             // Check if the invite is valid
@@ -88,7 +88,7 @@ impl UserManagementService {
         }
     }
 
-    pub fn create_invite(role: Role, explicit_consent_i: bool, conn: &mut DbConnection, user:
+    pub fn create_invite(role: Role, explicit_consent_i: bool, conn: &mut AnyConnection, user:
     User)
         -> Result<Invite,
         PodFetchError> {
@@ -100,13 +100,13 @@ impl UserManagementService {
         Err(PodFetchError::no_permissions_to_onboard_user())
     }
 
-    pub fn delete_user(user: User, conn: &mut DbConnection)->Result<(), PodFetchError>{
+    pub fn delete_user(user: User, conn: &mut AnyConnection)->Result<(), PodFetchError>{
 
         User::delete_user(&user, conn).expect("Error deleting User");
         return Ok(())
     }
 
-    pub fn update_role(user: User, conn: &mut DbConnection)->Result<UserWithoutPassword,
+    pub fn update_role(user: User, conn: &mut AnyConnection)->Result<UserWithoutPassword,
         PodFetchError>{
             return match User::update_role(&user, conn) {
                 Ok(user) => {
@@ -122,7 +122,7 @@ impl UserManagementService {
 
 
     pub fn get_invite_link(invite_id: String, environment_service: MutexGuard<EnvironmentService>,
-                           conn: &mut DbConnection) ->Result<String, PodFetchError>{
+                           conn: &mut AnyConnection) ->Result<String, PodFetchError>{
 
         match Invite::find_invite(invite_id, conn){
             Ok(invite) => {
@@ -144,7 +144,7 @@ impl UserManagementService {
     }
 
 
-    pub fn get_invite(invite_id: String, conn: &mut DbConnection)->Result<Invite, PodFetchError>{
+    pub fn get_invite(invite_id: String, conn: &mut AnyConnection)->Result<Invite, PodFetchError>{
         match Invite::find_invite(invite_id, conn){
             Ok(invite) => {
                 match invite {

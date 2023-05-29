@@ -13,7 +13,7 @@ use regex::Regex;
 use crate::config::dbconfig::establish_connection;
 
 use crate::controllers::settings_controller::ReplacementStrategy;
-use crate::DbConnection;
+use crate::AnyConnection;
 use crate::models::settings::Setting;
 use crate::service::path_service::PathService;
 use crate::service::settings_service::SettingsService;
@@ -35,7 +35,7 @@ impl FileService {
         }
     }
     pub fn check_if_podcast_main_image_downloaded(&mut self, podcast_id: &str, db: DB, conn: &mut
-    DbConnection) -> bool {
+    AnyConnection) -> bool {
         let podcast = db
             .clone()
             .get_podcast_by_directory_id(podcast_id, conn)
@@ -61,7 +61,7 @@ impl FileService {
         Ok(())
     }
 
-    pub fn create_podcast_directory_exists(podcast_title: &str, podcast_id: &String, conn:&mut DbConnection)
+    pub fn create_podcast_directory_exists(podcast_title: &str, podcast_id: &String, conn:&mut AnyConnection)
         ->Result<String,
         Error> {
         let escaped_title = prepare_podcast_title_to_directory(podcast_title,conn);
@@ -96,7 +96,7 @@ impl FileService {
         }
     }
 
-    pub async fn download_podcast_image(&self, podcast_path: &str, image_url: &str, podcast_id: &str, conn: &mut DbConnection) {
+    pub async fn download_podcast_image(&self, podcast_path: &str, image_url: &str, podcast_id: &str, conn: &mut AnyConnection) {
         let image_response = self.client.get(image_url).send().await.unwrap();
         let image_suffix = PodcastEpisodeService::get_url_file_suffix(image_url);
         let file_path = PathService::get_image_podcast_path_with_podcast_prefix(podcast_path, &image_suffix);
