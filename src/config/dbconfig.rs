@@ -10,7 +10,6 @@ pub struct ConnectionOptions {
     pub busy_timeout: Option<Duration>,
 }
 
-#[cfg(sqlite)]
 impl r2d2::CustomizeConnection<AnyConnection, diesel::r2d2::Error>
 for ConnectionOptions
 {
@@ -34,7 +33,7 @@ for ConnectionOptions
 
 pub fn establish_connection() -> AnyConnection {
     let database_url = &get_database_url();
-    Connection::establish(database_url)
+    AnyConnection::establish(database_url)
         .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
 }
 

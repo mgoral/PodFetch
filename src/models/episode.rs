@@ -7,7 +7,6 @@ use crate::dbconfig::schema::episodes;
 use utoipa::ToSchema;
 use diesel::sql_types::{Integer, Text, Nullable, Timestamp};
 use diesel::ExpressionMethods;
-use diesel::pg::PgQueryBuilder;
 use diesel::query_builder::QueryBuilder;
 use diesel::sqlite::SqliteQueryBuilder;
 use crate::db::DB;

@@ -82,9 +82,6 @@ mod dbconfig;
 
 import_database_connections!();
 
-
-type MyQueryBuilder = SqliteQueryBuilder;
-
 type DbPool = Pool<ConnectionManager<AnyConnection>>;
 
 type DbConnection = AnyConnection;
@@ -148,7 +145,15 @@ async fn main() -> std::io::Result<()> {
 
     let chat_server = lobby.start();
     let mut connection = establish_connection();
-    let res_migration = connection.run_pending_migrations(MIGRATIONS);
+    let res_migration;
+    if let AnyConnection::Postgresql(ref mut connection)= connection {
+        let mut migrations = embed_migrations!("./migrations/postgres");
+        let res_migration = connection.run_pending_migrations(migrations);
+    }
+    else if let AnyConnection::Sqlite(ref mut connection)= connection {
+        let mut migrations = embed_migrations!("./migrations/sqlite");
+        let res_migration = connection.run_pending_migrations(migrations);
+    }
 
     if res_migration.is_err(){
         panic!("Could not run migrations: {}",res_migration.err().unwrap());
@@ -432,36 +437,22 @@ pub fn check_server_config(service1: EnvironmentService) {
     }
 }
 
-#[cfg(sqlite)]
-async fn init_db_pool(database_url: &str)-> Result<Pool<ConnectionManager<SqliteConnection>>,
+async fn init_db_pool(database_url: &str)-> Result<Pool<ConnectionManager<AnyConnection >>,
     String> {
-    let manager = ConnectionManager::<SqliteConnection>::new(database_url);
-    let pool = Pool::builder().max_size(16)
-        .connection_customizer(Box::new(ConnectionOptions {
-        enable_wal: true,
-        enable_foreign_keys: true,
-        busy_timeout: Some(Duration::from_secs(120)),
-    })).build(manager).unwrap();
-    Ok(pool)
-}
-
-
-#[cfg(postgresql)]
-async fn init_db_pool(database_url: &str)-> Result<Pool<ConnectionManager<PgConnection>>,
-    String> {
-    let manager = ConnectionManager::<PgConnection>::new(database_url);
-    let pool = Pool::builder()
-        .max_size(1)
-        .build(manager)
-        .expect("Failed to create pool.");
-    Ok(pool)
-}
-
-#[cfg(mysql)]
-async fn init_db_pool(database_url: &str)-> Result<Pool<ConnectionManager<MysqlConnection >>,
-    String> {
-    let manager = ConnectionManager::<MysqlConnection >::new(database_url);
-    let pool = Pool::builder().max_size(16)
-        .build(manager).unwrap();
+    let connection = establish_connection();
+    let manager = ConnectionManager::<AnyConnection >::new(database_url);
+    let mut pool_builder = Pool::builder().max_size(16);
+    let pool;
+    if let AnyConnection::Sqlite(_) = connection {
+        pool = pool_builder
+            .connection_customizer(Box::new(ConnectionOptions {
+                enable_wal: true,
+                enable_foreign_keys: true,
+                busy_timeout: Some(Duration::from_secs(120)),
+            })).build(manager).unwrap();
+    }
+    else{
+        pool = pool_builder.build(manager).unwrap();
+    };
     Ok(pool)
 }
