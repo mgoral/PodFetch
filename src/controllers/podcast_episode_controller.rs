@@ -1,4 +1,4 @@
-use crate::service::mapping_service::MappingService;
+use crate::service::mapping_service::{MappingService, PodcastEpisodeWithPlayedTime};
 use crate::service::podcast_episode_service::PodcastEpisodeService;
 use actix_web::web::{Data, Query};
 use actix_web::{get, put};
@@ -43,14 +43,14 @@ pub async fn find_all_podcast_episodes_of_podcast(
         .unwrap();
     let mapped_podcasts = res
         .into_iter()
-        .map(|podcast| mapping_service.map_podcastepisode_to_dto(&podcast))
+        .map(|podcast| mapping_service.map_podcastepisode_to_dto(&podcast.0, podcast.1.clone()))
         .collect::<Vec<_>>();
     HttpResponse::Ok().json(mapped_podcasts)
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct TimeLinePodcastEpisode {
-    podcast_episode: PodcastEpisode,
+    podcast_episode: PodcastEpisodeWithPlayedTime,
     podcast: Podcast,
     favorite: Option<Favorite>,
 }
@@ -88,7 +88,8 @@ Responder {
 
     let mapped_timeline = res.data.iter().map(|podcast_episode| {
         let (podcast_episode, podcast, favorite) = podcast_episode.clone();
-        let mapped_podcast_episode = mapping_service.map_podcastepisode_to_dto(&podcast_episode);
+        let mapped_podcast_episode = mapping_service.map_podcastepisode_to_dto(&podcast_episode,
+                                                                               None);
 
         return TimeLinePodcastEpisode {
             podcast_episode: mapped_podcast_episode,

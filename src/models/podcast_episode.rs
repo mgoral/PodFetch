@@ -1,8 +1,8 @@
 use crate::dbconfig::schema::*;
 use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use diesel::prelude::{Queryable, Identifiable, Selectable, QueryableByName};
-use diesel::{BoolExpressionMethods, delete, insert_into, OptionalExtension, RunQueryDsl, TextExpressionMethods};
-use diesel::dsl::sql;
+use diesel::{BoolExpressionMethods, delete, insert_into, JoinOnDsl, OptionalExtension, RunQueryDsl, TextExpressionMethods};
+use diesel::dsl::{max, sql};
 use utoipa::ToSchema;
 use diesel::sql_types::{Integer, Text, Nullable, Timestamp};
 use diesel::QueryDsl;
@@ -13,6 +13,7 @@ use crate::models::podcasts::Podcast;
 use crate::utils::do_retry::do_retry;
 use crate::utils::time::opt_or_empty_string;
 use diesel::AsChangeset;
+use crate::models::podcast_history_item::PodcastHistoryItem;
 
 #[derive(Queryable, Identifiable,QueryableByName, Selectable, Debug, PartialEq, Clone, ToSchema,
 Serialize, Deserialize, Default, AsChangeset)]
@@ -161,26 +162,51 @@ impl PodcastEpisode{
         conn: &mut DbConnection,
         podcast_id_to_be_searched: i32,
         last_id: Option<String>,
-    ) -> Result<Vec<PodcastEpisode>, String> {
+    ) -> Result<Vec<(PodcastEpisode, Option<PodcastHistoryItem>)>, String> {
         use crate::dbconfig::schema::podcast_episodes::*;
         use crate::dbconfig::schema::podcast_episodes::dsl::podcast_episodes;
+        use crate::dbconfig::schema::podcast_episodes::dsl::episode_id as episode_id;
+
+        use crate::dbconfig::schema::podcast_history_items::table as podcast_history_items_table;
+        use crate::dbconfig::schema::podcast_history_items::date as watch_log_data;
+
+        use crate::dbconfig::schema::podcast_history_items::dsl::episode_id as history_episode_id;
+
+        let (history_item1, history_item2) = diesel::alias!(podcast_history_items as p1, podcast_history_items
+            as p2);
+
+        let subquery = history_item1
+            .select(diesel::dsl::max(history_item1.field(podcast_history_items::date)))
+            .filter(history_item1.field(podcast_history_items::episode_id).eq(history_item1.field(ehid)))
+            .group_by(history_item1.field(ehid));
+
+        let result = history_item2
+            .filter(history_item2.field(podcast_history_items::username).eq(designated_username))
+            .filter(history_item2.field(podcast_history_items::date).nullable().eq_any( subquery))
+            .load::<PodcastHistoryItem>(conn)
+            .unwrap();
+
         match last_id {
             Some(last_id) => {
                 let podcasts_found = podcast_episodes
+                    .left_join(result.on(history_episode_id.eq_any(subquery)))
                     .filter(podcast_id.eq(podcast_id_to_be_searched))
                     .filter(date_of_recording.lt(last_id))
+                    .group_by(episode_id)
+                    .having(max(watch_log_data))
                     .order(date_of_recording.desc())
                     .limit(75)
-                    .load::<PodcastEpisode>(conn)
+                    .load::<(PodcastEpisode, Option<PodcastHistoryItem>)>(conn)
                     .expect("Error loading podcasts");
                 Ok(podcasts_found)
             }
             None => {
                 let podcasts_found = podcast_episodes
+                    .left_join(podcast_history_items_table.on(history_episode_id.eq_any(subquery)))
                     .filter(podcast_id.eq(podcast_id_to_be_searched))
                     .order(date_of_recording.desc())
                     .limit(75)
-                    .load::<PodcastEpisode>(conn)
+                    .load::<(PodcastEpisode, Option<PodcastHistoryItem>)>(conn)
                     .expect("Error loading podcasts");
 
                 Ok(podcasts_found)

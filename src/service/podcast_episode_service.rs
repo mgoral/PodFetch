@@ -6,7 +6,7 @@ use crate::models::messages::BroadcastMessage;
 use crate::models::web_socket_message::Lobby;
 use crate::service::download_service::DownloadService;
 use crate::service::file_service::{determine_image_and_local_podcast_audio_url, FileService};
-use crate::service::mapping_service::MappingService;
+use crate::service::mapping_service::{MappingService, PodcastEpisodeWithPlayedTime};
 
 use crate::utils::podcast_builder::PodcastBuilder;
 use actix::Addr;
@@ -21,6 +21,7 @@ use rss::{Channel, Item};
 
 use crate::DbConnection;
 use crate::models::notification::Notification;
+use crate::models::podcast_history_item::PodcastHistoryItem;
 
 use crate::mutex::LockResultExt;
 use crate::service::environment_service::EnvironmentService;
@@ -79,7 +80,7 @@ impl PodcastEpisodeService {
                 );
                 let mapped_dto = self
                     .mapping_service
-                    .map_podcastepisode_to_dto(&podcast_inserted);
+                    .map_podcastepisode_to_dto(&podcast_inserted,None);
                 match lobby {
                     Some(lobby) => lobby.do_send(BroadcastMessage {
                         message: format!(
@@ -344,27 +345,28 @@ impl PodcastEpisodeService {
         return capture.get(1).unwrap().as_str().to_owned();
     }
 
-    pub fn query_for_podcast(&mut self, query: &str, conn:&mut DbConnection) -> Vec<PodcastEpisode> {
+    pub fn query_for_podcast(&mut self, query: &str, conn:&mut DbConnection) -> Vec<PodcastEpisodeWithPlayedTime> {
 
         let podcasts = Podcast::query_for_podcast(query,conn).unwrap();
         let podcast_dto = podcasts
             .iter()
-            .map(|podcast| self.mapping_service.map_podcastepisode_to_dto(podcast))
-            .collect::<Vec<PodcastEpisode>>();
+            .map(|podcast| self.mapping_service.map_podcastepisode_to_dto(podcast, None))
+            .collect::<Vec<PodcastEpisodeWithPlayedTime>>();
         return podcast_dto;
     }
 
     pub fn find_all_downloaded_podcast_episodes(&mut self, conn:&mut DbConnection, env: EnvironmentService) ->
-                                                                                   Vec<PodcastEpisode> {
+                                                                                   Vec<PodcastEpisodeWithPlayedTime> {
         let result = PodcastEpisode::get_episodes(conn);
         self.map_rss_podcast_episodes(env, result)
     }
 
-    fn map_rss_podcast_episodes(&mut self, env: EnvironmentService, result: Vec<PodcastEpisode>) -> Vec<PodcastEpisode> {
+    fn map_rss_podcast_episodes(&mut self, env: EnvironmentService, result: Vec<PodcastEpisode>) -> Vec<PodcastEpisodeWithPlayedTime> {
         result
             .iter()
             .map(|podcast| {
-                let mut podcast_episode_dto = self.mapping_service.map_podcastepisode_to_dto(podcast);
+                let mut podcast_episode_dto = self.mapping_service.map_podcastepisode_to_dto
+                (podcast, None);
                 return if podcast_episode_dto.is_downloaded() {
                     let local_url = self.map_to_local_url(&podcast_episode_dto.clone().local_url);
                     let local_image_url = self.map_to_local_url(&podcast_episode_dto.clone()
@@ -381,7 +383,7 @@ impl PodcastEpisodeService {
                     podcast_episode_dto
                 }
             })
-            .collect::<Vec<PodcastEpisode>>()
+            .collect::<Vec<PodcastEpisodeWithPlayedTime>>()
     }
 
 
@@ -401,7 +403,7 @@ impl PodcastEpisodeService {
         &mut self,
         podcast_id: i32,
         conn:&mut DbConnection
-    ) -> Vec<PodcastEpisode> {
+    ) -> Vec<PodcastEpisodeWithPlayedTime> {
         let env = EnvironmentService::new();
         let result = PodcastEpisode::get_episodes_by_podcast_id(podcast_id, conn);
         self.map_rss_podcast_episodes(env, result)
@@ -448,7 +450,7 @@ impl PodcastEpisodeService {
 
     pub fn get_podcast_episodes_of_podcast(conn: &mut DbConnection, id_num: i32, last_id:
     Option<String>)
-        -> Result<Vec<PodcastEpisode>, String> {
+                                           -> Result<Vec<(PodcastEpisode, Option<PodcastHistoryItem>)>, String> {
         PodcastEpisode::get_podcast_episodes_of_podcast(conn,id_num, last_id)
     }
 

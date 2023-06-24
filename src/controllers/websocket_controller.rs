@@ -13,6 +13,7 @@ use rss::{Category, CategoryBuilder, Channel, ChannelBuilder, EnclosureBuilder, 
 use std::sync::{Mutex};
 use crate::DbPool;
 use crate::mutex::LockResultExt;
+use crate::service::mapping_service::{MappingService, PodcastEpisodeWithPlayedTime};
 
 #[utoipa::path(
 context_path="/api/v1",
@@ -117,6 +118,7 @@ responses(
 pub async fn get_rss_feed_for_podcast(
     podcast_episode_service: Data<Mutex<PodcastEpisodeService>>,
     id: web::Path<i32>,
+    mapping_service: Data<Mutex<MappingService>>,
     conn: Data<DbPool>,
 ) -> HttpResponse {
     let env = EnvironmentService::new();
@@ -189,7 +191,7 @@ pub async fn get_rss_feed_for_podcast(
     }
 }
 
-fn get_podcast_items_rss(downloaded_episodes: Vec<PodcastEpisode>) -> Vec<Item> {
+fn get_podcast_items_rss(downloaded_episodes: Vec<PodcastEpisodeWithPlayedTime>) -> Vec<Item> {
 
     downloaded_episodes
         .iter()

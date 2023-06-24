@@ -4,6 +4,7 @@ use crate::models::podcasts::Podcast;
 
 use actix::prelude::{Message, Recipient};
 use uuid::Uuid;
+use crate::service::mapping_service::PodcastEpisodeWithPlayedTime;
 
 #[derive(Message)]
 #[rtype(result = "()")]
@@ -23,7 +24,7 @@ pub struct BroadcastMessage {
     pub message: String,
     pub podcast: Option<Podcast>,
     pub podcast_episodes: Option<Vec<PodcastEpisode>>,
-    pub podcast_episode: Option<PodcastEpisode>,
+    pub podcast_episode: Option<PodcastEpisodeWithPlayedTime>,
 }
 #[derive(Message)]
 #[rtype(result = "()")]

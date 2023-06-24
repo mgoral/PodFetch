@@ -174,7 +174,7 @@ impl PodcastHistoryItem{
                 match optional_podcast {
                     Some(podcast_episode) => {
                         let podcast_dto = mapping_service
-                            .map_podcastepisode_to_dto(&podcast_episode);
+                            .map_podcastepisode_to_dto(&podcast_episode, None);
                         let podcast = Podcast::get_podcast(conn, podcast_episode.podcast_id)
                             .unwrap();
                         let podcast_watch_model = mapping_service
